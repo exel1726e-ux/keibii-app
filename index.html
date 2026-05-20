@@ -1,180 +1,112 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>警備日報システム</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: sans-serif; background: #1a1a2e; color: #eee; padding: 20px; }
-    h1 { text-align: center; color: #00d4ff; margin-bottom: 20px; }
-    .card { background: #16213e; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-    label { display: block; margin-bottom: 6px; color: #00d4ff; }
-    input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #0f3460; color: #eee; font-size: 1rem; margin-bottom: 12px; }
-    .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 12px; }
-    .btn-blue { background: #00d4ff; color: #1a1a2e; }
-    .btn-green { background: #00b894; color: white; }
-    .btn-red { background: #ff4444; color: white; }
-    #statusMsg { text-align: center; padding: 12px; border-radius: 8px; margin-top: 12px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>警備日報システム</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:sans-serif;background:#1a1a2e;color:#eee;padding:20px;}
+h1{text-align:center;color:#00d4ff;margin-bottom:20px;}
+.card{background:#16213e;border-radius:12px;padding:20px;margin-bottom:16px;}
+label{display:block;margin-bottom:6px;color:#00d4ff;}
+input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #444;background:#0f3460;color:#eee;font-size:1rem;margin-bottom:12px;}
+.btn{width:100%;padding:16px;border:none;border-radius:12px;font-size:1rem;font-weight:bold;cursor:pointer;margin-bottom:12px;}
+.btn-blue{background:#00d4ff;color:#1a1a2e;}
+.btn-green{background:#00b894;color:white;}
+</style>
 </head>
 <body>
 
 <div id="loginScreen">
-  <div class="card" style="max-width:400px;margin:80px auto;">
-    <h1>🔐 警備日報システム</h1>
-    <br>
-    <label>担当者名</label>
-    <input type="text" id="loginName" placeholder="例：田中">
-    <label>パスワード</label>
-    <input type="password" id="loginPass" placeholder="例：1234">
-    <button class="btn btn-blue" id="loginBtn">ログイン</button>
-    <p id="loginError" style="color:red;display:none;">担当者名またはパスワードが違います</p>
-  </div>
+<div class="card" style="max-width:400px;margin:80px auto;">
+<h1>🔐 警備日報システム</h1><br>
+<label>担当者名</label>
+<input type="text" id="loginName">
+<label>パスワード</label>
+<input type="password" id="loginPass">
+<button class="btn btn-blue" onclick="doLogin()">ログイン</button>
+<p id="loginError" style="color:red;display:none;">担当者名またはパスワードが違います</p>
+</div>
 </div>
 
 <div id="mainScreen" style="display:none;">
-  <h1>📋 警備日報入力</h1>
-  <div class="card">
-    <button class="btn btn-blue" id="micBtn">🎤 音声入力開始</button>
-    <p id="voiceText" style="color:#aaa;"></p>
-  </div>
-  <div class="card">
-    <label>日付</label>
-    <input type="date" id="date">
-    <label>現場名</label>
-    <select id="site">
-      <option value="">選択してください</option>
-          <option>ボートピア高城</option>
-      <option>国道10号線</option>
-      <option>国道269号線</option>
-      <option>都城市役所</option>
-      <option>小林庁舎</option>
-      <option>霧島酒造</option> 
-      
-    </select>
-    <label>担当者名</label>
-    <input type="text" id="name">
-    <label>始業時刻</label>
-    <input type="time" id="startTime">
-    <label>終業時刻</label>
-    <input type="time" id="endTime">
-    <label>巡回時刻</label>
-    <input type="text" id="patrol" placeholder="例：10:00、14:00">
-    <label>異常の有無</label>
-    <select id="incident">
-      <option value="異常なし">異常なし</option>
-      <option value="異常あり">異常あり</option>
-    </select>
-    <label>引継ぎ内容</label>
-    <textarea id="handover" rows="3"></textarea>
-  </div>
-  <button class="btn btn-green" id="submitBtn">✅ 日報を送信する</button>
-  <p id="statusMsg"></p>
+<h1>📋 警備日報入力</h1>
+<div class="card">
+<button class="btn btn-blue" onclick="doVoice()">🎤 音声入力開始</button>
+<p id="voiceText" style="color:#aaa;"></p>
+</div>
+<div class="card">
+<label>日付</label><input type="date" id="date">
+<label>現場名</label>
+<select id="site">
+<option value="">選択してください</option>
+<option>ボートピア高城</option>
+<option>国道10号線</option>
+<option>国道269号線</option>
+<option>都城市役所</option>
+<option>小林庁舎</option>
+<option>霧島酒造</option>
+</select>
+<label>担当者名</label><input type="text" id="name">
+<label>始業時刻</label><input type="time" id="startTime">
+<label>終業時刻</label><input type="time" id="endTime">
+<label>巡回時刻</label><input type="text" id="patrol" placeholder="例：10:00、14:00">
+<label>異常の有無</label>
+<select id="incident">
+<option value="異常なし">異常なし</option>
+<option value="異常あり">異常あり</option>
+</select>
+<label>引継ぎ内容</label>
+<textarea id="handover" rows="3"></textarea>
+</div>
+<button class="btn btn-green" onclick="doSubmit()">✅ 日報を送信する</button>
+<p id="statusMsg"></p>
 </div>
 
 <script>
-var GAS_URL = "https://script.google.com/macros/s/AKfycbxauaur_NcheoDNYMR-zp5rD2XC6bM7uju2puUCpjbH0VRVL7Hwv9Pnn1Hv14fX_fo/
+var GAS_URL = "https://script.google.com/macros/s/AKfycbxauaur_NcheoDNYMR-zp5rD2XC6bM7uju2puUCpjbH0VRVL7Hwv9Pnn1Hv14fX_fo/exec";
 var USERS = {"田中":"1234","佐藤":"1234","竹下":"1234","山田":"1234","郡山":"1234","築地":"1234","吉田":"1234","鈴木":"1234","武田":"1234","川野":"1234","近藤":"1234","西田":"1234","加藤":"1234","宮下":"1234","斎藤":"1234","関":"1234","久保":"1234","川北":"1234","湯川":"1234","滝川":"1234"};
-document.getElementById("loginBtn").addEventListener("click", function() {
+
+function doLogin() {
   var name = document.getElementById("loginName").value.trim();
   var pass = document.getElementById("loginPass").value.trim();
   if (USERS[name] && USERS[name] === pass) {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("mainScreen").style.display = "block";
     document.getElementById("name").value = name;
-    var today = new Date().toISOString().split("T")[0];
-    document.getElementById("date").value = today;
+    document.getElementById("date").value = new Date().toISOString().split("T")[0];
   } else {
     document.getElementById("loginError").style.display = "block";
   }
-});
+}
 
-document.getElementById("micBtn").addEventListener("click", function() {
-  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-    alert("音声入力はChromeブラウザで使えます");
-    return;
-  }
+function doVoice() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert("Chromeブラウザをお使いください"); return; }
   var rec = new SR();
   rec.lang = "ja-JP";
   rec.onresult = function(e) {
     var text = e.results[0][0].transcript;
     document.getElementById("voiceText").innerText = "認識：" + text;
-    
-    // 始業時刻
-    var s = text.match(/始業.{0,2}(\d+)時/);
+    var s = text.match(/始業.{0,3}(\d+)時/);
     if (s) document.getElementById("startTime").value = s[1].padStart(2,"0") + ":00";
-    
-    // 終業時刻
-    var e2 = text.match(/終業.{0,2}(\d+)時/);
-    if (e2) document.getElementById("endTime").value = e2[1].padStart(2,"0") + ":00";
-    
-    // 巡回時刻
-    var p = text.match(/巡回.{0,2}(.+?)異常/);
+    var en = text.match(/終業.{0,3}(\d+)時/);
+    if (en) document.getElementById("endTime").value = en[1].padStart(2,"0") + ":00";
+    var p = text.match(/巡回.{0,3}(.+?)異常/);
     if (p) document.getElementById("patrol").value = p[1].trim();
-    
-    // 異常の有無
     if (text.includes("異常なし")) document.getElementById("incident").value = "異常なし";
     if (text.includes("異常あり")) document.getElementById("incident").value = "異常あり";
-    
-    // 引継ぎ
-    var h = text.match(/引継ぎ.{0,2}(.+)/);
+    var h = text.match(/引継ぎ.{0,3}(.+)/);
     if (h) document.getElementById("handover").value = h[1].trim();
-    
-    // 現場名
     ["ボートピア高城","国道10号線","国道269号線","都城市役所","小林庁舎","霧島酒造"].forEach(function(site) {
       if (text.includes(site)) document.getElementById("site").value = site;
     });
   };
-    var text = e.results[0][0].transcript;
-    document.getElementById("voiceText").innerText = "認識：" + text;
-    fillFormFromVoice(text);s
-  };
-
-function fillFormFromVoice(text) {
-  // 始業時刻
-  var startMatch = text.match(/始業[はが]?(\d+)時/);
-  if (startMatch) {
-    document.getElementById("startTime").value = startMatch[1].padStart(2,"0") + ":00";
-  }
-  // 終業時刻
-  var endMatch = text.match(/終業[はが]?(\d+)時/);
-  if (endMatch) {
-    document.getElementById("endTime").value = endMatch[1].padStart(2,"0") + ":00";
-  }
-  // 巡回時刻
-  var patrolMatch = text.match(/巡回[はが]?(.+?)、/);
-  if (patrolMatch) {
-    document.getElementById("patrol").value = patrolMatch[1];
-  }
-  // 異常の有無
-  if (text.includes("異常なし")) {
-    document.getElementById("incident").value = "異常なし";
-  } else if (text.includes("異常あり")) {
-    document.getElementById("incident").value = "異常あり";
-  }
-  // 引継ぎ内容
-  var handoverMatch = text.match(/引継ぎ(.+)/);
-  if (handoverMatch) {
-    document.getElementById("handover").value = handoverMatch[1];
-  }
-  // 現場名
-  var sites = ["ボートピア高城","国道10号線","国道269号線","都城市役所","小林庁舎","霧島酒造"];
-  sites.forEach(function(site) {
-    if (text.includes(site)) {
-      document.getElementById("site").value = site;
-    }
-  });
-}
   rec.start();
-  document.getElementById("micBtn").innerText = "🔴 録音中...";
-  rec.onend = function() {
-    document.getElementById("micBtn").innerText = "🎤 音声入力開始";
-  };
-});
+}
 
-document.getElementById("submitBtn").addEventListener("click", function() {
+function doSubmit() {
   var text = "日付：" + document.getElementById("date").value
     + "、現場名：" + document.getElementById("site").value
     + "、担当者名：" + document.getElementById("name").value
@@ -183,7 +115,6 @@ document.getElementById("submitBtn").addEventListener("click", function() {
     + "、巡回時刻：" + document.getElementById("patrol").value
     + "、異常の有無：" + document.getElementById("incident").value
     + "、引継ぎ内容：" + document.getElementById("handover").value;
-
   fetch(GAS_URL, {
     method: "POST",
     headers: {"Content-Type":"application/x-www-form-urlencoded"},
@@ -195,7 +126,7 @@ document.getElementById("submitBtn").addEventListener("click", function() {
     document.getElementById("statusMsg").style.color = "#ff4444";
     document.getElementById("statusMsg").innerText = "❌ 送信失敗しました";
   });
-});
+}
 </script>
 </body>
 </html>
