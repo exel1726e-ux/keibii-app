@@ -103,6 +103,34 @@ document.getElementById("micBtn").addEventListener("click", function() {
   rec.onresult = function(e) {
     var text = e.results[0][0].transcript;
     document.getElementById("voiceText").innerText = "認識：" + text;
+    
+    // 始業時刻
+    var s = text.match(/始業.{0,2}(\d+)時/);
+    if (s) document.getElementById("startTime").value = s[1].padStart(2,"0") + ":00";
+    
+    // 終業時刻
+    var e2 = text.match(/終業.{0,2}(\d+)時/);
+    if (e2) document.getElementById("endTime").value = e2[1].padStart(2,"0") + ":00";
+    
+    // 巡回時刻
+    var p = text.match(/巡回.{0,2}(.+?)異常/);
+    if (p) document.getElementById("patrol").value = p[1].trim();
+    
+    // 異常の有無
+    if (text.includes("異常なし")) document.getElementById("incident").value = "異常なし";
+    if (text.includes("異常あり")) document.getElementById("incident").value = "異常あり";
+    
+    // 引継ぎ
+    var h = text.match(/引継ぎ.{0,2}(.+)/);
+    if (h) document.getElementById("handover").value = h[1].trim();
+    
+    // 現場名
+    ["ボートピア高城","国道10号線","国道269号線","都城市役所","小林庁舎","霧島酒造"].forEach(function(site) {
+      if (text.includes(site)) document.getElementById("site").value = site;
+    });
+  };
+    var text = e.results[0][0].transcript;
+    document.getElementById("voiceText").innerText = "認識：" + text;
     fillFormFromVoice(text);
   };function fillFormFromVoice(text) {
   // 始業時刻
