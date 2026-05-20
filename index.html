@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>警備日報システム</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #1a1a2e; color: #eee; padding: 20px; }
+    h1 { text-align: center; color: #00d4ff; margin-bottom: 20px; }
+    .card { background: #16213e; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; color: #00d4ff; }
+    input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #0f3460; color: #eee; font-size: 1rem; margin-bottom: 12px; }
+    .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 12px; }
+    .btn-blue { background: #00d4ff; color: #1a1a2e; }
+    .btn-green { background: #00b894; color: white; }
+    .btn-red { background: #ff4444; color: white; }
+    #statusMsg { text-align: center; padding: 12px; border-radius: 8px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="card" style="max-width:400px;margin:80px auto;">
+    <h1>🔐 警備日報システム</h1>
+    <br>
+    <label>担当者名</label>
+    <input type="text" id="loginName" placeholder="例：田中">
+    <label>パスワード</label>
+    <input type="password" id="loginPass" placeholder="例：1234">
+    <button class="btn btn-blue" id="loginBtn">ログイン</button>
+    <p id="loginError" style="color:red;display:none;">担当者名またはパスワードが違います</p>
+  </div>
+</div>
+
+<div id="mainScreen" style="display:none;">
+  <h1>📋 警備日報入力</h1>
+  <div class="card">
+    <button class="btn btn-blue" id="micBtn">🎤 音声入力開始</button>
+    <p id="voiceText" style="color:#aaa;"></p>
+  </div>
+  <div class="card">
+    <label>日付</label>
+    <input type="date" id="date">
+    <label>現場名</label>
+    <select id="site">
+      <option value="">選択してください</option>
+          <option>ボートピア高城</option>
+      <option>国道10号線</option>
+      <option>国道269号線</option>
+      <option>都城市役所</option>
+      <option>小林庁舎</option>
+      <option>霧島酒造</option> 
+      
+    </select>
+    <label>担当者名</label>
+    <input type="text" id="name">
+    <label>始業時刻</label>
+    <input type="time" id="startTime">
+    <label>終業時刻</label>
+    <input type="time" id="endTime">
+    <label>巡回時刻</label>
+    <input type="text" id="patrol" placeholder="例：10:00、14:00">
+    <label>異常の有無</label>
+    <select id="incident">
+      <option value="異常なし">異常なし</option>
+      <option value="異常あり">異常あり</option>
+    </select>
+    <label>引継ぎ内容</label>
+    <textarea id="handover" rows="3"></textarea>
+  </div>
+  <button class="btn btn-green" id="submitBtn">✅ 日報を送信する</button>
+  <p id="statusMsg"></p>
+</div>
+
+<script>
+var GAS_URL = "https://script.google.com/macros/s/AKfycbxauaur_NcheoDNYMR-zp5rD2XC6bM7uju2puUCpjbH0VRVL7Hwv9Pnn1Hv14fX_fo/exec";
+
+var USERS = {"田中":"0000","佐藤":"0000","竹下":"0000","山田":"0000","郡山":"0000","築地":"0000","吉田":"0000","鈴木":"0000","武田":"0000","川野":"0000","近藤":"0000","西田":"0000","加藤":"0000","宮下":"0000","斎藤":"0000","関":"0000","久保":"0000","川北":"0000","湯川":"0000","滝川":"0000"};
+
+document.getElementById("loginBtn").addEventListener("click", function() {
+  var name = document.getElementById("loginName").value.trim();
+  var pass = document.getElementById("loginPass").value.trim();
+  if (USERS[name] && USERS[name] === pass) {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("mainScreen").style.display = "block";
+    document.getElementById("name").value = name;
+    var today = new Date().toISOString().split("T")[0];
+    document.getElementById("date").value = today;
+  } else {
+    document.getElementById("loginError").style.display = "block";
+  }
+});
+
+document.getElementById("micBtn").addEventListener("click", function() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    alert("音声入力はChromeブラウザで使えます");
+    return;
+  }
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = new SR();
+  rec.lang = "ja-JP";
+  rec.onresult = function(e) {
+    var text = e.results[0][0].transcript;
+    document.getElementById("voiceText").innerText = "認識：" + text;
+  };
+  rec.start();
+  document.getElementById("micBtn").innerText = "🔴 録音中...";
+  rec.onend = function() {
+    document.getElementById("micBtn").innerText = "🎤 音声入力開始";
+  };
+});
+
+document.getElementById("submitBtn").addEventListener("click", function() {
+  var text = "日付：" + document.getElementById("date").value
+    + "、現場名：" + document.getElementById("site").value
+    + "、担当者名：" + document.getElementById("name").value
+    + "、始業時刻：" + document.getElementById("startTime").value
+    + "、終業時刻：" + document.getElementById("endTime").value
+    + "、巡回時刻：" + document.getElementById("patrol").value
+    + "、異常の有無：" + document.getElementById("incident").value
+    + "、引継ぎ内容：" + document.getElementById("handover").value;
+
+  fetch(GAS_URL, {
+    method: "POST",
+    headers: {"Content-Type":"application/x-www-form-urlencoded"},
+    body: "text=" + encodeURIComponent(text)
+  }).then(function() {
+    document.getElementById("statusMsg").style.color = "#00b894";
+    document.getElementById("statusMsg").innerText = "✅ 送信しました！";
+  }).catch(function() {
+    document.getElementById("statusMsg").style.color = "#ff4444";
+    document.getElementById("statusMsg").innerText = "❌ 送信失敗しました";
+  });
+});
+</script>
+</body>
+</html>
