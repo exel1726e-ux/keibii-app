@@ -86,19 +86,21 @@ function doVoice() {
   if (!SR) { alert("Chromeブラウザをお使いください"); return; }
   var rec = new SR();
   rec.lang = "ja-JP";
+ rec.continuous = true;
+rec.interimResults = false; 
   rec.onresult = function(e) {
     var text = e.results[0][0].transcript;
     document.getElementById("voiceText").innerText = "認識：" + text;
-    var s = text.match(/始業.{0,3}(\d+)時/);
-    if (s) document.getElementById("startTime").value = s[1].padStart(2,"0") + ":00";
-    var en = text.match(/終業.{0,3}(\d+)時/);
-    if (en) document.getElementById("endTime").value = en[1].padStart(2,"0") + ":00";
-    var p = text.match(/巡回.{0,3}(.+?)異常/);
-    if (p) document.getElementById("patrol").value = p[1].trim();
-    if (text.includes("異常なし")) document.getElementById("incident").value = "異常なし";
-    if (text.includes("異常あり")) document.getElementById("incident").value = "異常あり";
-    var h = text.match(/引継ぎ.{0,3}(.+)/);
-    if (h) document.getElementById("handover").value = h[1].trim();
+  var s = text.match(/[始修][業行].{0,3}(\d+)時/);
+if (s) document.getElementById("startTime").value = s[1].padStart(2,"0") + ":00";
+var en = text.match(/[終就][業].{0,3}(\d+)時/);
+if (en) document.getElementById("endTime").value = en[1].padStart(2,"0") + ":00";
+var p = text.match(/巡回.{0,3}(.+?)異常/);
+if (p) document.getElementById("patrol").value = p[1].trim();
+if (text.includes("異常なし")) document.getElementById("incident").value = "異常なし";
+if (text.includes("異常あり")) document.getElementById("incident").value = "異常あり";
+var h = text.match(/引.{0,2}継.{0,3}(.+)/);
+if (h) document.getElementById("handover").value = h[1].trim();  
     ["ボートピア高城","国道10号線","国道269号線","都城市役所","小林庁舎","霧島酒造"].forEach(function(site) {
       if (text.includes(site)) document.getElementById("site").value = site;
     });
