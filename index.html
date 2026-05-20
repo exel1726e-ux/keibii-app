@@ -94,7 +94,11 @@ rec.interimResults = false;
   var s = text.match(/[始修][業行].{0,3}(\d+)時/);
 if (s) document.getElementById("startTime").value = s[1].padStart(2,"0") + ":00";
 var en = text.match(/[終就][業].{0,3}(\d+)時/);
-if (en) document.getElementById("endTime").value = en[1].padStart(2,"0") + ":00";
+if (en) {
+  var enh = parseInt(en[1]);
+  if (enh < 6) enh = enh + 12;
+  document.getElementById("endTime").value = enh.toString().padStart(2,"0") + ":00";
+}
 var p = text.match(/巡回.{0,3}(.+?)異常/);
 if (p) document.getElementById("patrol").value = p[1].trim();
 if (text.includes("異常なし")) document.getElementById("incident").value = "異常なし";
