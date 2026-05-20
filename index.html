@@ -103,7 +103,42 @@ document.getElementById("micBtn").addEventListener("click", function() {
   rec.onresult = function(e) {
     var text = e.results[0][0].transcript;
     document.getElementById("voiceText").innerText = "認識：" + text;
-  };
+    fillFormFromVoice(text);
+  };function fillFormFromVoice(text) {
+  // 始業時刻
+  var startMatch = text.match(/始業[はが]?(\d+)時/);
+  if (startMatch) {
+    document.getElementById("startTime").value = startMatch[1].padStart(2,"0") + ":00";
+  }
+  // 終業時刻
+  var endMatch = text.match(/終業[はが]?(\d+)時/);
+  if (endMatch) {
+    document.getElementById("endTime").value = endMatch[1].padStart(2,"0") + ":00";
+  }
+  // 巡回時刻
+  var patrolMatch = text.match(/巡回[はが]?(.+?)、/);
+  if (patrolMatch) {
+    document.getElementById("patrol").value = patrolMatch[1];
+  }
+  // 異常の有無
+  if (text.includes("異常なし")) {
+    document.getElementById("incident").value = "異常なし";
+  } else if (text.includes("異常あり")) {
+    document.getElementById("incident").value = "異常あり";
+  }
+  // 引継ぎ内容
+  var handoverMatch = text.match(/引継ぎ(.+)/);
+  if (handoverMatch) {
+    document.getElementById("handover").value = handoverMatch[1];
+  }
+  // 現場名
+  var sites = ["ボートピア高城","国道10号線","国道269号線","都城市役所","小林庁舎","霧島酒造"];
+  sites.forEach(function(site) {
+    if (text.includes(site)) {
+      document.getElementById("site").value = site;
+    }
+  });
+}
   rec.start();
   document.getElementById("micBtn").innerText = "🔴 録音中...";
   rec.onend = function() {
