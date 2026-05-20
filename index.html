@@ -131,8 +131,10 @@ document.getElementById("micBtn").addEventListener("click", function() {
   };
     var text = e.results[0][0].transcript;
     document.getElementById("voiceText").innerText = "認識：" + text;
-    fillFormFromVoice(text);
-  };function fillFormFromVoice(text) {
+    fillFormFromVoice(text);s
+  };
+
+function fillFormFromVoice(text) {
   // 始業時刻
   var startMatch = text.match(/始業[はが]?(\d+)時/);
   if (startMatch) {
