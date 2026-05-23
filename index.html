@@ -93,7 +93,7 @@ rec.interimResults = false;
     document.getElementById("voiceText").innerText = "認識：" + text;
   var s = text.match(/[始修][業行].{0,3}(\d+)時/);
 if (s) document.getElementById("startTime").value = s[1].padStart(2,"0") + ":00";
-var en = text.match(/[終就][業].{0,3}(\d+)時/);
+var en = text.match(/[終就][業行]は?(\d+)時/);
 if (en) {
   var enh = parseInt(en[1]);
   if (enh < 6) enh = enh + 12;
