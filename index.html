@@ -14,6 +14,7 @@ input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid
 .btn{width:100%;padding:16px;border:none;border-radius:12px;font-size:1rem;font-weight:bold;cursor:pointer;margin-bottom:12px;}
 .btn-blue{background:#00d4ff;color:#1a1a2e;}
 .btn-green{background:#00b894;color:white;}
+.btn-red{background:#ff4444;color:white;}
 </style>
 </head>
 <body>
@@ -33,8 +34,10 @@ input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid
 <div id="mainScreen" style="display:none;">
 <h1>📋 警備日報入力</h1>
 <div class="card">
-<button class="btn btn-blue" onclick="doVoice()">🎤 音声入力開始</button>
-<p id="voiceText" style="color:#aaa;"></p>
+<label>🎤 音声入力</label>
+<button class="btn btn-blue" id="micBtn" onclick="startVoice()">🎤 押して話す</button>
+<button class="btn btn-red" id="stopBtn" onclick="stopVoice()" style="display:none;">⏹ 停止する</button>
+<p id="voiceText" style="color:#aaa;min-height:40px;"></p>
 </div>
 <div class="card">
 <label>日付</label><input type="date" id="date">
@@ -81,38 +84,61 @@ function doLogin() {
   }
 }
 
-function doVoice() {
+var rec = null;
+
+function startVoice() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { alert("Chromeブラウザをお使いください"); return; }
-  var rec = new SR();
+  rec = new SR();
   rec.lang = "ja-JP";
- rec.continuous = true;
-rec.interimResults = false; 
+  rec.continuous = true;
+  rec.interimResults = true;
   rec.onresult = function(e) {
-    var text = e.results[0][0].transcript;
+    var text = "";
+    for (var i = 0; i < e.results.length; i++) {
+      text += e.results[i][0].transcript;
+    }
     document.getElementById("voiceText").innerText = "認識：" + text;
-  var s = text.match(/[始修][業行].{0,3}(\d+)時/);
-if (s) document.getElementById("startTime").value = s[1].padStart(2,"0") + ":00";
-var en = text.match(/[終就][業行]は?(\d+)時/);
-if (en) {
-  var enh = parseInt(en[1]);
-  if (enh < 6) enh = enh + 12;
-  document.getElementById("endTime").value = enh.toString().padStart(2,"0") + ":00";
-}
-var p = text.match(/巡回.{0,3}(.+?)異常/);
-if (p) document.getElementById("patrol").value = p[1].trim();
-if (text.includes("異常なし")) document.getElementById("incident").value = "異常なし";
-if (text.includes("異常あり")) document.getElementById("incident").value = "異常あり";
-var h = text.match(/引.{0,2}継.{0,3}(.+)/);
-if (h) document.getElementById("handover").value = h[1].trim();  
-    ["ボートピア高城","国道10号線","国道269号線","都城市役所","小林庁舎","霧島酒造"].forEach(function(site) {
-      if (text.includes(site)) document.getElementById("site").value = site;
-    });
+    parseVoice(text);
+  };
+  rec.onerror = function(e) {
+    document.getElementById("voiceText").innerText = "エラー：" + e.error;
   };
   rec.start();
-  rec.onspeechend = function() {
-  rec.stop();
-};
+  document.getElementById("micBtn").style.display = "none";
+  document.getElementById("stopBtn").style.display = "block";
+}
+
+function stopVoice() {
+  if (rec) rec.stop();
+  document.getElementById("micBtn").style.display = "block";
+  document.getElementById("stopBtn").style.display = "none";
+}
+
+function parseVoice(text) {
+  // 現場名
+  ["ボートピア高城","国道10号線","国道269号線","都城市役所","小林庁舎","霧島酒造"].forEach(function(site) {
+    if (text.includes(site)) document.getElementById("site").value = site;
+  });
+  // 始業時刻
+  var s = text.match(/[始修][業行]は?(\d+)時/);
+  if (s) document.getElementById("startTime").value = s[1].padStart(2,"0") + ":00";
+  // 終業時刻
+  var en = text.match(/[終就][業行]は?(\d+)時/);
+  if (en) {
+    var enh = parseInt(en[1]);
+    if (enh < 6) enh = enh + 12;
+    document.getElementById("endTime").value = enh.toString().padStart(2,"0") + ":00";
+  }
+  // 巡回時刻
+  var p = text.match(/巡回は?(.+?)異常/);
+  if (p) document.getElementById("patrol").value = p[1].trim();
+  // 異常の有無
+  if (text.includes("異常なし")) document.getElementById("incident").value = "異常なし";
+  if (text.includes("異常あり")) document.getElementById("incident").value = "異常あり";
+  // 引継ぎ
+  var h = text.match(/引.{0,2}継.{0,3}は?(.+)/);
+  if (h) document.getElementById("handover").value = h[1].trim();
 }
 
 function doSubmit() {
