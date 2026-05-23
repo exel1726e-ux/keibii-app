@@ -138,7 +138,7 @@ function parseVoice(text) {
   if (text.includes("異常あり")) document.getElementById("incident").value = "異常あり";
   // 引継ぎ
   var h = text.match(/引.{0,2}継.{0,3}は?(.+)/);
-  if (h) document.getElementById("handover").value = h[1].replace(/^[はに]/,"").trim();
+ if (h) document.getElementById("handover").value = h[1].trim();
 }
 
 function doSubmit() {
