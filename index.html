@@ -110,6 +110,9 @@ if (h) document.getElementById("handover").value = h[1].trim();
     });
   };
   rec.start();
+  rec.onspeechend = function() {
+  rec.stop();
+};
 }
 
 function doSubmit() {
